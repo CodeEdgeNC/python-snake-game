@@ -17,10 +17,9 @@ from pygame.locals import *
 from random import randint
 import pygame
 import time
-import os
+import os,sys
 import shelve
-#import tkinter
-#import tkinter.messagebox
+import tkinter.messagebox
 
 
 # The Apple Class
@@ -40,7 +39,8 @@ class Apple:
         surface.blit(image, (self.x, self.y))
 
 
-class Snake:
+#
+class Snake :
     x = [0]
     y = [0]
     step = 44
@@ -73,14 +73,14 @@ class Snake:
                 self.y[i] = self.y[i - 1]
 
             # update position of head of snake
-            if self.direction == 0:      # Move Right
+            if self.direction == 0:      #  Move Right
                 self.x[0] = self.x[0] + self.step
                 if self.windowWidth < self.x[0]:
                     self.x[0] = self.windowWidth - self.x[0]
 
-            if self.direction == 1:      # Move Left
+            if self.direction == 1:      #  Move Left
                 self.x[0] = self.x[0] - self.step
-                if self.x[0] < 0:
+                if self.x[0]  < 0:
                     self.x[0] = self.windowWidth - self.x[0]
 
             if self.direction == 2:      # Move Down
@@ -145,12 +145,10 @@ class App:
         # pygame.mixer_music.load("gamemusic.wav")
 
         # Set the game drawing surface
-        self._display_surf = pygame.display.set_mode(
-            (self.windowWidth, self.windowHeight), pygame.HWSURFACE)
+        self._display_surf = pygame.display.set_mode((self.windowWidth, self.windowHeight), pygame.HWSURFACE)
 
         # Set the title of the window
-        pygame.display.set_caption(
-            'Youth Innovation Summit Programming Workshop - Snake Game')
+        pygame.display.set_caption('Youth Innovation Summit Programming Workshop - Snake Game')
         self._running = True
 
         # Load the snake and apple images
@@ -166,8 +164,7 @@ class App:
 
         # does snake eat apple?
         for i in range(0, self.snake.length):
-            if self.game.isCollision(
-                    self.apple.x, self.apple.y, self.snake.x[i], self.snake.y[i], 44):
+            if self.game.isCollision(self.apple.x, self.apple.y, self.snake.x[i], self.snake.y[i], 44):
                 # Move the Apple to a new location
                 self.apple.x = randint(2, 9) * 44
                 self.apple.y = randint(2, 9) * 44
@@ -175,42 +172,53 @@ class App:
                 # Add 1 block to the length of the Snake
                 self.snake.length = self.snake.length + 1
 
-        # Get access to high score file
-        highScoreFile = shelve.open('score.txt')
-
         # does snake collide with itself?
         for i in range(2, self.snake.length):
-            if self.game.isCollision(
-                    self.snake.x[0], self.snake.y[0], self.snake.x[i], self.snake.y[i], 40):
+            if self.game.isCollision(self.snake.x[0], self.snake.y[0], self.snake.x[i], self.snake.y[i], 40):
 
-                highscore = highScoreFile['score']  # Read highscore from disk
+                # import shelve
+                d = shelve.open('score.txt')
+                # d['score'] = 0
+
+                highscore = d['score']  # Read highscore from disk
 
                 if self.snake.length <= highscore:
-                    highscoretext = "Your score is " + str(self.snake.length) + '\r\r' + \
-                                    "The high score is: " + str(highscore)
+                    highscoretext = "Your score is " + str(self.snake.length)
                 else:
-                    highscoretext = "New High Score!!! \r Your score is " + \
-                        str(self.snake.length)
+                    highscoretext = "New High Score!!! \r Your score is " + str(self.snake.length)
                     # Save new high score
-                    highScoreFile['score'] = self.snake.length
+                    d['score'] = highscore
+
+                d.close()
+
+
+
+                #if self.snake.length > 3:
+                #if self.snake.length > highscore:
+                    # Save new high score
+                    # d = shelve.open('score.txt')
+                #    d['score'] = highscore
+                #    highscoretext = "New High Score!!! " + highscoretext + '\r\r'
+
+                # close file
+                #d.close()
 
                 # Show Message Box to indicate that the game is over
-                #root = tkinter.Tk()     # get access to root tk window
-                #root.withdraw()         # do not display extra root tk window
-                # tkinter.messagebox.showinfo('Game Over!',
-                # highscoretext + '\r\r')
-#
- #               answer = tkinter.messagebox.askyesno(
-  #                  "Game Over", highscoretext + '\r\r' + "Do you want to reset the highscore?", )
-   #             if answer == False:
-    #                highScoreFile.close()
-     #               exit(0)
-      #          else:
-       #             # Save new high score
-        #            highScoreFile['score'] = 0
-         #           highScoreFile.close()
-          #          self.snake.length = 3
-           #         exit(0)
+                root = tkinter.Tk()     # get access to root tk window
+                root.withdraw()         # do not display extra root tk window
+                tkinter.messagebox.showinfo('Game Over!',
+                                            highscoretext + '\r\r' +
+                                            'The Snake lengh is: ' + str(self.snake.length)) + '\r\r'
+
+
+
+                # Write to the Python Console
+                print("Game Over! Collision: ")
+                print("x[0] (" + str(self.snake.x[0]) + "," + str(self.snake.y[0]) + ")")
+                print("x[" + str(i) + "] (" + str(self.snake.x[i]) + "," + str(self.snake.y[i]) + ")")
+
+                # Exit Program
+                exit(0)
 
         pass
 
@@ -243,7 +251,7 @@ class App:
             self._running = False
 
         # play music while game is running
-        # pygame.mixer.music.play(10)
+        #pygame.mixer.music.play(10)
 
         while (self._running):
             pygame.event.pump()
@@ -267,7 +275,7 @@ class App:
             self.on_loop()
             self.on_render()
 
-            time.sleep(50.0 / 1000.0)
+            time.sleep(50.0 / 1000.0);
         self.on_cleanup()
 
 
